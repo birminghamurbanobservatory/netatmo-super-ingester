@@ -1,0 +1,49 @@
+{
+  "name": "netatmo-super-ingester",
+  "version": "1.0.0",
+  "description": "Pulls in data from the Netatmo API. Crucially it does this using a combination of both getPublicData and getMeasure requests, and is careful not to breach the tight Netatmo API limits too often.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "test": "LOGGER_ENABLED=false jest --runInBand --env=node",
+    "test-debug": "LOGGER_ENABLED=true LOGGER_FORMAT=terminal LOGGER_LEVEL=debug jest --runInBand --env=node",
+    "build": "rm -rf dist && tsc",
+    "build:start": "npm run build && npm start",
+    "build:live": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts",
+    "docker:build": "docker build -t gcr.io/urban-observatory/netatmo-super-ingester:$npm_package_version .",
+    "docker:push": "docker push gcr.io/urban-observatory/netatmo-super-ingester:$npm_package_version",
+    "dockerise": "npm run build && npm run docker:build && npm run docker:push"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@hapi/joi": "^17.1.1",
+    "axios": "^0.19.2",
+    "bluebird": "^3.7.2",
+    "bluebird-retry": "^0.11.0",
+    "check-types": "^11.1.2",
+    "cls-hooked": "^4.2.2",
+    "convert-units": "^2.3.4",
+    "date-fns": "^2.14.0",
+    "dotenv": "^8.2.0",
+    "event-stream": "github:birminghamurbanobservatory/event-stream#semver:^2.0.0",
+    "lodash": "^4.17.19",
+    "mongoose": "^5.9.22",
+    "node-logger": "github:birminghamurbanobservatory/node-logger#semver:^1.0.0",
+    "shortid": "^2.2.15",
+    "uuid": "^8.2.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.4",
+    "@types/lodash": "^4.14.157",
+    "@types/node": "^14.0.20",
+    "@typescript-eslint/eslint-plugin": "^3.6.0",
+    "@typescript-eslint/parser": "^3.6.0",
+    "eslint": "^7.4.0",
+    "jest": "^26.1.0",
+    "nodemon": "^2.0.4",
+    "ts-jest": "^26.1.1",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.6"
+  }
+}
