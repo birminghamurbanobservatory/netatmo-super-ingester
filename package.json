@@ -14,7 +14,11 @@
     "docker:push": "docker push gcr.io/urban-observatory/netatmo-super-ingester:$npm_package_version",
     "dockerise": "npm run build && npm run docker:build && npm run docker:push"
   },
-  "author": "",
+  "author": "Simon Bell",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/birminghamurbanobservatory/netatmo-super-ingester.git"
+  },
   "license": "ISC",
   "dependencies": {
     "@hapi/joi": "^17.1.1",
