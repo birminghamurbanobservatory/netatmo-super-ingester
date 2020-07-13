@@ -3,6 +3,8 @@ import {Measurement} from '../netatmo/measurement';
 import {DeviceApp} from '../device/device-app';
 import {sub} from 'date-fns';
 import * as check from 'check-types';
+import {calculateRainRate} from '../utils/rain.service';
+import {kilometrePerHourToMetresPerSecond} from '../utils/wind.service';
 
 
 
@@ -41,7 +43,7 @@ export function measurementsToUrbanObs(device: DeviceApp, module, measurements: 
     const sixMinsBeforeMeasurementTime = sub(measurement.time, {minutes: 6});
     const fourMinsBeforeMeasurementTime = sub(measurement.time, {minutes: 4});
     const fiveMinsBeforeMeasurementTime = sub(measurement.time, {minutes: 5});
-    const usePreviousTimestep = (previousTimestep > sixMinsBeforeMeasurementTime) && (previousTimestep > fourMinsBeforeMeasurementTime);
+    const usePreviousTimestep = (previousTimestep > sixMinsBeforeMeasurementTime) && (previousTimestep < fourMinsBeforeMeasurementTime);
     const hasBeginning = usePreviousTimestep ? previousTimestep : fiveMinsBeforeMeasurementTime;
 
     possibleTypes.forEach((type) => {
@@ -51,7 +53,7 @@ export function measurementsToUrbanObs(device: DeviceApp, module, measurements: 
         // Temperature
         //------------------------
         if (type === 'temperature') {
-          const tempObservation = {
+          const obs = {
             madeBySensor: generateSensorId(module.moduleId, type),
             resultTime: measurement.time.toISOString(),
             location,
@@ -63,14 +65,14 @@ export function measurementsToUrbanObs(device: DeviceApp, module, measurements: 
             aggregation: 'instant',
             usedProcedures: ['netatmo-temperature-instantaneous']
           };
-          observations.push(tempObservation);
+          observations.push(obs);
         }
 
         //------------------------
         // Humidity
         //------------------------
         if (type === 'humidity') {
-          const tempObservation = {
+          const obs = {
             madeBySensor: generateSensorId(module.moduleId, type),
             resultTime: measurement.time.toISOString(),
             location,
@@ -82,11 +84,164 @@ export function measurementsToUrbanObs(device: DeviceApp, module, measurements: 
             aggregation: 'instant',
             usedProcedures: ['netatmo-humidity-instantaneous']
           };
-          observations.push(tempObservation);
+          observations.push(obs);
         }
 
+        //------------------------
+        // Rain
+        //------------------------
+        if (type === 'rain') {
 
-        // TODO: Got other variables to add
+          // depth
+          const depthObs = {
+            madeBySensor: generateSensorId(module.moduleId, type),
+            resultTime: measurement.time.toISOString(),
+            phenomenonTime: {
+              hasBeginning: hasBeginning.toISOString(),
+              hasEnd: measurement.time.toISOString()
+            },
+            location,
+            hasResult: {
+              value: measurement[type],
+              unit: 'millimetre'
+            },
+            observedProperty: 'precipitation-depth',
+            aggregation: 'sum',
+            usedProcedures: ['uo-netatmo-precip-depth-derivation']
+          };
+          observations.push(depthObs);
+
+          // rate
+          const rateObs = {
+            madeBySensor: generateSensorId(module.moduleId, type),
+            resultTime: measurement.time.toISOString(),
+            phenomenonTime: {
+              hasBeginning: hasBeginning.toISOString(),
+              hasEnd: measurement.time.toISOString()
+            },
+            location,
+            hasResult: {
+              value: calculateRainRate(hasBeginning, measurement.time, measurement[type]),
+              unit: 'millimetre-per-hour'
+            },
+            observedProperty: 'precipitation-rate',
+            aggregation: 'average',
+            usedProcedures: ['uo-netatmo-precip-rate-derivation']
+          };
+          observations.push(rateObs);
+
+        }
+
+        //------------------------
+        // Pressure
+        //------------------------
+        if (type === 'pressure') {
+          const obs = {
+            madeBySensor: generateSensorId(module.moduleId, type),
+            resultTime: measurement.time.toISOString(),
+            location,
+            hasResult: {
+              value: measurement[type],
+              unit: 'hectopascal'
+            },
+            observedProperty: 'air-pressure-at-mean-sea-level',
+            aggregation: 'instant',
+            usedProcedures: ['netatmo-pressure-instantaneous', 'netatmo-pressure-adjusted-to-sea-level']
+          };
+          observations.push(obs);
+        }
+
+        //------------------------
+        // Wind Speed
+        //------------------------
+        if (type === 'windStrength') {
+          const obs = {
+            madeBySensor: generateSensorId(module.moduleId, type),
+            resultTime: measurement.time.toISOString(),
+            phenomenonTime: {
+              hasBeginning: hasBeginning.toISOString(),
+              hasEnd: measurement.time.toISOString()
+            },
+            location,
+            hasResult: {
+              value: kilometrePerHourToMetresPerSecond(measurement[type]),
+              unit: 'metre-per-second'
+            },
+            observedProperty: 'wind-speed',
+            aggregation: 'average',
+            usedProcedures: ['netatmo-wind-speed-5-min-average', 'kilometre-per-hour-to-metre-per-second']
+          };
+          observations.push(obs);
+        }
+
+        //------------------------
+        // Wind speed maximum
+        //------------------------
+        if (type === 'gustStrength') {
+          const obs = {
+            madeBySensor: generateSensorId(module.moduleId, type),
+            resultTime: measurement.time.toISOString(),
+            phenomenonTime: {
+              hasBeginning: hasBeginning.toISOString(),
+              hasEnd: measurement.time.toISOString()
+            },
+            location,
+            hasResult: {
+              value: kilometrePerHourToMetresPerSecond(measurement[type]),
+              unit: 'metre-per-second'
+            },
+            observedProperty: 'wind-speed',
+            aggregation: 'maximum',
+            usedProcedures: ['netatmo-wind-speed-5-min-maximum', 'kilometre-per-hour-to-metre-per-second']
+          };
+          observations.push(obs);
+        }
+
+        //------------------------
+        // Wind Direction
+        //------------------------
+        if (type === 'windAngle') {
+          const obs = {
+            madeBySensor: generateSensorId(module.moduleId, type),
+            resultTime: measurement.time.toISOString(),
+            phenomenonTime: {
+              hasBeginning: hasBeginning.toISOString(),
+              hasEnd: measurement.time.toISOString()
+            },
+            location,
+            hasResult: {
+              value: measurement[type],
+              unit: 'degree'
+            },
+            observedProperty: 'wind-direction',
+            aggregation: 'average',
+            usedProcedures: ['netatmo-wind-direction-5-min-average']
+          };
+          observations.push(obs);
+        }
+
+        //------------------------
+        // Wind Gust Direction
+        //------------------------
+        if (type === 'gustAngle') {
+          const obs = {
+            madeBySensor: generateSensorId(module.moduleId, type),
+            resultTime: measurement.time.toISOString(),
+            phenomenonTime: {
+              hasBeginning: hasBeginning.toISOString(),
+              hasEnd: measurement.time.toISOString()
+            },
+            location,
+            hasResult: {
+              value: measurement[type],
+              unit: 'degree'
+            },
+            observedProperty: 'wind-direction',
+            aggregation: 'maximum', // is 'maximum' the right thing to use here?
+            usedProcedures: ['netatmo-wind-dir-during-5-min-max-speed']
+          };
+          observations.push(obs);
+        }
 
       }
     });

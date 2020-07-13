@@ -77,7 +77,7 @@ async function upsertDeviceWithNewPublicData(deviceData): Promise<void> {
     existingDevice = await getDevice(deviceData.deviceId);
   } catch (err) {
     if (err.name === 'DeviceNotFound') {
-      logger.debug(`This is the first time deviceId '${deviceData.deviceId} has been seen.'`);
+      logger.info(`This is the first time deviceId '${deviceData.deviceId} has been seen.'`);
     } else {
       throw err;
     }

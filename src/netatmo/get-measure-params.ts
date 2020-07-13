@@ -5,4 +5,5 @@ export interface GetMeasureParams {
   accessToken: string;
   type: string[]; //e.g. ['temperature', 'humidity'] 
   dateBegin?: Date; 
+  dateEnd?: Date; 
 }

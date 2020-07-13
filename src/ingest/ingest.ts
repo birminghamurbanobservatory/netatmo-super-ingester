@@ -3,6 +3,7 @@ import * as Promise from 'bluebird';
 import {config} from '../config';
 import {updateDeviceList} from './ingest-device-list';
 import {updateOldestCheckedDevice} from './ingest-oldest-checked-device';
+import {incrementCheckedDeviceCount} from './reporter.service';
 
 let timeOfLastDevicesUpdate;
 
@@ -24,6 +25,7 @@ export async function ingest(): Promise<void> {
 
     try {
       await updateOldestCheckedDevice();
+      await incrementCheckedDeviceCount();
     } catch (err) {
       logger.error('Failed to update the oldest checked device', err);
     }

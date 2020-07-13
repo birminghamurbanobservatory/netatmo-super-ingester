@@ -4,6 +4,8 @@ export interface DeviceApp {
   location: Location;
   extras: Extras;
   modules: Module[];
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 interface Location {

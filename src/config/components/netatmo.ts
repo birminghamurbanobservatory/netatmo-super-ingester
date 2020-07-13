@@ -32,6 +32,8 @@ const schema = joi.object({
     .default(7),
   NETATMO_MINUTES_BETWEEN_DEVICE_LIST_UPDATE: joi.number() // in minutes
     .default(120),
+  NETATMO_ANNOUNCE_EVERY: joi.number() // Every n devices some statistics will be logged.
+    .default(100),
   NETATMO_CLIENT_ID: joi.string()
     .required(),
   NETATMO_CLIENT_SECRET: joi.string()
@@ -83,6 +85,7 @@ export const netatmo = {
     password: envVars.NETATMO_PASSWORD,
   },
   secondsBetweenRequests: envVars.NETATMO_SECONDS_BETWEEN_REQUESTS,
-  minutesBetweenDeviceListUpdate: envVars.NETATMO_MINUTES_BETWEEN_DEVICE_LIST_UPDATE
+  minutesBetweenDeviceListUpdate: envVars.NETATMO_MINUTES_BETWEEN_DEVICE_LIST_UPDATE,
+  announceEvery: envVars.NETATMO_ANNOUNCE_EVERY
 
 };

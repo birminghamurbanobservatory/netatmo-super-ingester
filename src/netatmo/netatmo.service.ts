@@ -207,6 +207,10 @@ export async function getMeasure(params: GetMeasureParams): Promise<Measurement[
     formattedParams.date_begin = round(params.dateBegin.getTime() / 1000);
   }
 
+  if (params.dateEnd) {
+    formattedParams.date_end = round(params.dateEnd.getTime() / 1000);
+  }
+
   let response;
   try {
 
@@ -233,10 +237,11 @@ export async function getMeasure(params: GetMeasureParams): Promise<Measurement[
 
   }
 
-  if (response.data && Array.isArray(response.data.body)) {
+  if (response.data && check.object(response.data.body)) {
     const measurements = optimisedGetMeasureBodyToMeasurements(response.data.body, params.type);
     return measurements;
   } else {
+    logger.debug(response.data);
     throw new Error('Netatmo getmeasure response is not formatted as expected');
   }
 
