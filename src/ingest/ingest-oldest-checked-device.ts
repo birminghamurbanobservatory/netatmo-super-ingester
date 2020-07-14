@@ -97,6 +97,7 @@ export async function updateOldestCheckedDevice(): Promise<void> {
 
   // If this device has no modules left what-so-ever then we should delete the whole device.
   if (deviceUpdates.modules.length === 0) {
+    logger.info(`Device ${device.deviceId} no longer has any active modules, and thus it will be removed from the database.`);
     await deleteDevice(device.deviceId);
   
   // Otherwise update it
