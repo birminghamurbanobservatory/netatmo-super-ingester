@@ -1,6 +1,6 @@
 {
   "name": "netatmo-super-ingester",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Pulls in data from the Netatmo API. Crucially it does this using a combination of both getPublicData and getMeasure requests, and is careful not to breach the tight Netatmo API limits too often.",
   "main": "index.js",
   "scripts": {
